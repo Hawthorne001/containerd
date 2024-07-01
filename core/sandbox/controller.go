@@ -23,8 +23,8 @@ import (
 
 	"github.com/containerd/containerd/api/types"
 	"github.com/containerd/containerd/v2/core/mount"
-	"github.com/containerd/platforms"
 	"github.com/containerd/typeurl/v2"
+	imagespec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type CreateOptions struct {
@@ -99,7 +99,7 @@ type Controller interface {
 	Start(ctx context.Context, sandboxID string) (ControllerInstance, error)
 	// Platform returns target sandbox OS that will be used by Controller.
 	// containerd will rely on this to generate proper OCI spec.
-	Platform(_ctx context.Context, _sandboxID string) (platforms.Platform, error)
+	Platform(_ctx context.Context, _sandboxID string) (imagespec.Platform, error)
 	// Stop will stop sandbox instance
 	Stop(ctx context.Context, sandboxID string, opts ...StopOpt) error
 	// Wait blocks until sandbox process exits.
@@ -111,6 +111,9 @@ type Controller interface {
 	Shutdown(ctx context.Context, sandboxID string) error
 	// Metrics queries the sandbox for metrics.
 	Metrics(ctx context.Context, sandboxID string) (*types.Metric, error)
+	// Update changes a part of sandbox, such as extensions/annotations/labels/spec of
+	// Sandbox object, controllers may have to update the running sandbox according to the changes.
+	Update(ctx context.Context, sandboxID string, sandbox Sandbox, fields ...string) error
 }
 
 type ControllerInstance struct {
